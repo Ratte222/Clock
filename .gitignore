@@ -71,7 +71,6 @@ bld/
 *.d
 #MDK-ARM User-specific files
 *.uvguix
-*.uvoptx
 *.scvd
 *.Artur
 *.dbgconf
