@@ -24,6 +24,7 @@ namespace GetWeather
         public Server(int Port)
         {
             // Создаем "слушателя" для указанного порта
+
             Listener = new TcpListener(IPAddress.Any, Port);
             Listener.Start(); // Запускаем его
 

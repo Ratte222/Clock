@@ -99,10 +99,10 @@ void  DHT_init(DHT_t *dht, DHT_Type_t type, TIM_HandleTypeDef *tim,uint16_t  tim
   dht->gpio = gpio;
   dht->pin = pin;
   dht->type = type;
-//  if (DHT_Type_DHT11 != dht->type)
-//  {
-//	  DHT_output(dht);
-//  }
+  if (DHT_Type_DHT11 != dht->type)
+  {
+	  DHT_output(dht);
+  }
   dht->tim->Init.Prescaler = timerBusFrequencyMHz - 1;
   dht->tim->Init.CounterMode = TIM_COUNTERMODE_UP;
   dht->tim->Init.Period = 0xFFFF;
@@ -117,7 +117,6 @@ void  DHT_init(DHT_t *dht, DHT_Type_t type, TIM_HandleTypeDef *tim,uint16_t  tim
 bool  DHT_readData(DHT_t *dht, float *Temperature, float *Humidity)
 {
   uint32_t  startTime;
-	uint8_t data[5] = {0};
   switch(dht->type)
   {
   	case DHT_Type_DHT11:
@@ -147,7 +146,7 @@ bool  DHT_readData(DHT_t *dht, float *Temperature, float *Humidity)
 		}
   		//DelayMicro(40);
   		DHT_delayUs(dht, 40);
-  		//uint8_t data[5] = {0};
+  		uint8_t data[5] = {0};
   		for (uint8_t j=0; j<5; j++)
 		{
 			data[4-j]=0;
@@ -186,48 +185,6 @@ bool  DHT_readData(DHT_t *dht, float *Temperature, float *Humidity)
   		return true;
   		break;
     case DHT_Type_DHT21:
-			HAL_GPIO_WritePin(dht->gpio, dht->pin, GPIO_PIN_RESET);//низкий уровень
-  		DHT_delayUs(dht, 5000);
-  		HAL_GPIO_WritePin(dht->gpio, dht->pin, GPIO_PIN_SET);
-
-
-  		//DelayMicro(30);
-  		DHT_delayUs(dht, 30);
-  		if(HAL_GPIO_ReadPin(dht->gpio, dht->pin))
-  		{
-  			return false;
-  		}
-  		//DelayMicro(92);
-  		DHT_delayUs(dht, 80);
-  		if(!HAL_GPIO_ReadPin(dht->gpio, dht->pin))
-			{
-				return false;
-			}
-  		//DelayMicro(40);
-  		DHT_delayUs(dht, 40);
-  		
-  		for (uint8_t j=0; j<5; j++)
-			{
-				data[4-j]=0;
-				for(uint8_t i=0; i<8; i++)
-				{
-					while(!HAL_GPIO_ReadPin(dht->gpio, dht->pin)); //ждЄм отпускани¤ шины
-					//DelayMicro(30);
-					DHT_delayUs(dht, 30);
-					if(HAL_GPIO_ReadPin(dht->gpio, dht->pin)) //читаем результат по прошествии 30 микросекунд
-					{	//если шина за это врем¤ не прит¤нулась к земле, то значит это единица, а если прит¤нулась, то ноль
-						data[4-j] |= (1<<(7-i));
-					}
-					while(HAL_GPIO_ReadPin(dht->gpio, dht->pin)); //ждЄм, пока датчик прит¤нет шину (в случае единицы)
-				}
-			}
-  		dht->temperature = (float)(data[2]*256 + data[3]) / 10.0f;
-			if(Temperature != NULL)
-				*Temperature = dht->temperature;
-			dht->humidity = (float)(data[0]*256 + data[1]) / 10.0f;
-			if(Humidity != NULL)
-				*Humidity = dht->humidity;
-			return true;
     case DHT_Type_AM2301:
     case DHT_Type_AM2305:
       DHT_output(dht);
@@ -248,7 +205,7 @@ bool  DHT_readData(DHT_t *dht, float *Temperature, float *Humidity)
           goto ERROR;
         if(HAL_GetTick() - dht->time > 1)
         {
-          //uint8_t data[5];
+          uint8_t data[5];
           if(DHT_decode(dht,data) == false)
             goto ERROR;
           if(((data[0] + data[1] + data[2] + data[3]) & 0x00FF) != data[4])
