@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "main.h"
+#include "main.c"
 //#include "stm32f1xx_hal.h"
 #include <string.h>
 #include <stdlib.h>
